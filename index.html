@@ -308,7 +308,8 @@ function hitPlan(e,pi){
 }
 function parseLogger(el){
   if(!el.files[0])return;let r=new FileReader();r.onload=e=>{
-    let lines=e.target.result.split(/?
+    let lines=e.target.result.split(/
+?
 /).filter(l=>l.trim()),ts=[],hs=[];
     lines.forEach(l=>{let p=l.split(/[;,	]/).map(s=>parseFloat(s.replace(',','.'))).filter(n=>!isNaN(n));if(p.length>=2){ts.push(p[0]);hs.push(p[1]);}});
     if(!ts.length){document.getElementById('logOut').innerText='Keine gültigen Zahlenreihen (Temp;Feuchte) erkannt.';return;}
