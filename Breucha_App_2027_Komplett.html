@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Breucha Malerbetrieb e.K. – Baustellen & Feuchtemessung</title>
+<style>
+:root{--b:#1e3a5f;--bg:#f4f6f9;--bd:#cbd5e1}
+*{box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif}
+body{margin:0;background:var(--bg);color:#1e293b;padding:8px;font-size:14px}
+.w{max-width:1050px;margin:auto}
+.hd{background:var(--b);color:#fff;padding:12px 16px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.hd h1{margin:0;font-size:18px}.hd small{opacity:.9;font-size:12px}
+.lg{background:#fff;color:var(--b);padding:6px 10px;border-radius:6px;cursor:pointer;min-width:130px;min-height:48px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;text-align:center}
+.lg img{max-height:44px;max-width:170px}
+.tb{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;background:#fff;padding:8px;border-radius:8px;border:1px solid var(--bd)}
+.tb button{background:#f1f5f9;border:1px solid #94a3b8;padding:7px 10px;border-radius:5px;cursor:pointer;font-weight:600;font-size:13px}
+.tb button.p{background:var(--b);color:#fff;border-color:var(--b)}
+.c{background:#fff;border:1px solid var(--bd);border-radius:8px;padding:12px;margin-bottom:10px}
+.c h2{margin:0 0 8px;font-size:15px;color:var(--b);border-bottom:1px solid #e2e8f0;padding-bottom:4px;display:flex;justify-content:space-between;align-items:center}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:8px}
+label{display:block;font-size:12px;font-weight:600;margin-bottom:2px;color:#334155}
+input,select,textarea{width:100%;padding:6px 8px;border:1px solid #94a3b8;border-radius:4px;font-size:13px;background:#fff}
+textarea{min-height:54px;resize:vertical}
+.mp{border:1px solid #94a3b8;border-radius:6px;padding:10px;margin-bottom:10px;background:#f8fafc}
+.mph{display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px;border-bottom:1px solid #cbd5e1;padding-bottom:5px}
+.kl{background:#eff6ff;border:1px solid #bfdbfe;padding:6px 8px;border-radius:5px;margin:6px 0;font-size:12px}
+.im{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.ib{border:1px solid #cbd5e1;background:#fff;padding:5px;border-radius:5px;width:165px;font-size:11px}
+.ib img{width:100%;height:105px;object-fit:cover;border-radius:3px}
+.tg{background:#fff7ed;border:1px solid #fed7aa;padding:6px;border-radius:5px;margin-top:6px}
+.btn{background:#e2e8f0;border:1px solid #94a3b8;padding:5px 9px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600}
+.btn.b{background:var(--b);color:#fff;border-color:var(--b)}.btn.d{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
+.hide{display:none!important}
+.tg-bar{display:flex;flex-wrap:wrap;gap:10px;background:#fff;padding:8px 12px;border-radius:8px;border:1px solid var(--bd);margin-bottom:10px;font-size:13px}
+.tg-bar label{display:inline-flex;align-items:center;gap:4px;margin:0;cursor:pointer}
+.tg-bar input{width:auto}
+canvas.pl{border:1px solid #64748b;background:#fff;max-width:100%;touch-action:none;cursor:crosshair}
+.lk{position:fixed;inset:0;background:rgba(15,23,42,.92);display:flex;align-items:center;justify-content:center;z-index:999}
+.lkb{background:#fff;padding:22px;border-radius:10px;max-width:340px;width:92%;text-align:center}
+@media print{.no-p{display:none!important}body{background:#fff;padding:0}.c,.mp{break-inside:avoid;border-color:#999}}
+</style></head><body><div class="w">
+<div class="hd">
+  <div><h1>Breucha Malerbetrieb e.K. – Baustellen & Feuchtemessung</h1><small>Schramberger Str. 29 · 78628 Rottweil · Tel. 0741 13173 · info@breucha.de</small></div>
+  <div class="lg" id="logoBox" onclick="document.getElementById('logoIn').click()" title="Logo wählen">🖼️ Breucha Logo<br><small>(Tippen zum Laden)</small></div>
+  <input type="file" id="logoIn" accept="image/*" class="hide" onchange="loadLogo(this)">
+</div>
+
+<div class="tb no-p">
+  <button onclick="newProj()">📄 Neu</button>
+  <button onclick="discardProj()">🗑️ Verwerfen</button>
+  <button onclick="saveLocal(1)">💾 Speichern</button>
+  <button onclick="openProjModal()">🗂️ Projekte / Import</button>
+  <button onclick="exportJson()">☁️ Cloud/JSON</button>
+  <button onclick="sendGmail()">✉️ Gmail</button>
+  <button onclick="connUSB()">🔌 USB</button>
+  <button onclick="connBLE()">📶 BT</button>
+  <button onclick="shareProj()">📲 Handy-Send</button>
+  <button class="p" onclick="window.print()">📄 PDF / Druck</button>
+  <button onclick="lockApp()">🔒 Schließen</button>
+</div>
+
+<div class="tg-bar no-p">
+  <b>Module:</b>
+  <label><input type="checkbox" id="mPlans" onchange="tog('secPlans',this.checked)"> Pläne & Verortung</label>
+  <label><input type="checkbox" id="mSite" onchange="tog('secSite',this.checked)"> Baustellenverhältnisse</label>
+  <label><input type="checkbox" id="mLog" onchange="tog('secLog',this.checked)"> Datenlogger</label>
+  <label><input type="checkbox" id="mCost" onchange="tog('secCost',this.checked)"> Kostenschätzung</label>
+  <label><input type="checkbox" id="mDry" onchange="tog('secDry',this.checked)"> Bautrocknung & kWh</label>
+  <label><input type="checkbox" id="mNorm" onchange="tog('secNorm',this.checked)"> Normen & Legende</label>
+</div>
+
+<div class="c">
+  <h2>1. Projekt- & Objektdaten <span id="hwStat" style="font-size:11px;color:#0369a1"></span></h2>
+  <div class="g">
+    <div><label>Protokoll-Nr.</label><input id="pNr"></div>
+    <div><label>Datum</label><input type="date" id="pDate"></div>
+    <div><label>Prüfer / Techniker</label><input id="pTech" value="Arno Seemann"></div>
+    <div><label>Kunde / Auftraggeber</label><input id="pCust"></div>
+    <div><label>Objekt / Baustelle</label><input id="pObj"></div>
+    <div><label>Messgerät (Feuchte)</label><select id="pDev"><option>Gann Hydromette (Digits)</option><option>Trotec T660 (Digits)</option><option>CM-Messung (CM-%)</option><option>Darr-Methode (Masse-%)</option><option>Klima-Hygrometer</option></select></div>
+    <div><label>Thermografiekamera</label><select id="pCam" onchange="updCam()"><option value="hikmicro">HIKMICRO</option><option value="flir">FLIR</option><option value="testo">Testo</option><option value="bosch">Bosch Thermal</option><option value="seek">Seek Thermal</option><option value="other">Sonstige / IR</option></select></div>
+    <div><label>Außenklima (°C / % r.F.)</label><input id="pOut" placeholder="z.B. 8°C / 78% r.F."></div>
+  </div>
+</div>
+
+<div class="c hide" id="secSite">
+  <h2>Dokumentation der Baustellenverhältnisse</h2>
+  <div class="g" style="margin-bottom:8px">
+    <div><label>Zweck / Überschrift</label><select id="siteType" onchange="if(this.value)document.getElementById('siteTitle').value=this.value"><option value="">-- Auswahl oder frei eingeben --</option><option>Vorleistungsprüfung</option><option>Bedenkenanmeldung nach VOB/B</option><option>Behinderungsanzeige</option><option>Arbeitsbeschrieb</option><option>Gutachterliche Feststellung</option></select></div>
+    <div><label>Manuelle Bezeichnung</label><input id="siteTitle" value="Vorleistungsprüfung"></div>
+  </div>
+  <div class="no-p" style="margin-bottom:6px;display:flex;flex-wrap:wrap;gap:4px">
+    <button class="btn" onclick="addSiteTxt('Untergrundprüfung gemäß VOB/C durchgeführt: Restfeuchte / Tragfähigkeit nicht ausreichend für nachfolgende Beschichtung.')">+ Vorleistung nicht bereit</button>
+    <button class="btn" onclick="addSiteTxt('Bedenkenanmeldung: Erhöhte Bauwerksfeuchte / Wärmebrücke festgestellt. Vor Weiterarbeit ist eine technische Trocknung erforderlich.')">+ Bedenken Feuchte</button>
+    <button class="btn" onclick="addSiteTxt('Behinderungsanzeige: Baustellenbereich nicht geräumt / keine ausreichende Beheizung und Belüftung vorhanden.')">+ Behinderung</button>
+  </div>
+  <textarea id="siteText" placeholder="Feststellungen, Mängel, Bedenken, Arbeitsbeschrieb..."></textarea>
+  <div class="no-p" style="margin-top:6px"><button class="btn b" onclick="document.getElementById('siteImgIn').click()">📷 Fotos hinzufügen (Mehrfach)</button><input type="file" id="siteImgIn" accept="image/*" multiple class="hide" onchange="addSiteImgs(this)"></div>
+  <div class="im" id="siteImgs"></div>
+</div>
+
+<div class="c hide" id="secPlans">
+  <h2>Mehrplan-Grundriss & Verortung (Messpunkt- & Verortungspins)</h2>
+  <div class="no-p" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px">
+    <button class="btn b" onclick="document.getElementById('planIn').click()">🗺️ Plan / Grundriss hochladen</button>
+    <input type="file" id="planIn" accept="image/*" multiple class="hide" onchange="addPlans(this)">
+    <button class="btn" onclick="addBlankPlan()">✏️ Leere Skizze anlegen</button>
+    <span>Pin-Typ:</span>
+    <select id="pinType" style="width:auto"><option value="MP">📍 Messpunkt-Pin (MP)</option><option value="V">📌 Verortungs-Pin (V)</option></select>
+    <input id="pinLabel" placeholder="Pin-Text (z.B. MP 1 / Bedenken)" style="width:180px">
+  </div>
+  <div id="plansList"></div>
+</div>
+
+<div class="c">
+  <h2>2. Messpunkte & Einzelraumklima
+    <span class="no-p"><button class="btn b" onclick="addMP(false)">+ Messpunkt einfügen</button> <button class="btn" onclick="addMP(true)">📋 Vorherigen duplizieren</button></span>
+  </h2>
+  <div id="mpList"></div>
+</div>
+
+<div class="c hide" id="secLog">
+  <h2>Datenlogger-Auswertung (CSV / TXT Import)</h2>
+  <div class="no-p" style="margin-bottom:8px"><button class="btn b" onclick="document.getElementById('logIn').click()">📊 Logger-Datei importieren (.csv/.txt)</button><input type="file" id="logIn" accept=".csv,.txt" class="hide" onchange="parseLogger(this)"></div>
+  <div id="logOut" style="font-size:13px">Noch keine Datenlogger-Datei geladen.</div>
+  <canvas id="logChart" width="760" height="190" class="hide" style="max-width:100%;border:1px solid #cbd5e1;margin-top:6px"></canvas>
+</div>
+
+<div class="c">
+  <h2>3. Gesamtbewertung & Sanierungsvorschlag</h2>
+  <div class="no-p" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">
+    <button class="btn" onclick="addSan('Schimmelpilzbefall fachgerecht nach UBA-Leitfaden entfernen und Flächen mit fungizider Sanierlösung behandeln.')">+ UBA-Schimmelentfernung</button>
+    <button class="btn" onclick="addSan('Innenseitige Wärmedämmung mit diffusionsoffenen Calciumsilikat-Klimaplatten zur Vermeidung von Tauwasserausfall.')">+ Calciumsilikat-Platten</button>
+    <button class="btn" onclick="addSan('Diffusionsoffener Anstrichaufbau mit mineralischer Silikat- oder Kalkfarbe.')">+ Silikat-/Kalkanstrich</button>
+    <button class="btn" onclick="addSan('Technische Bautrocknung bis zum Erreichen der Ausgleichsfeuchte durchführen.')">+ Bautrocknung</button>
+    <button class="btn" onclick="addSan('Nutzerhinweis: Stoßlüften 3-4x täglich und gleichmäßige Raumtemperatur sicherstellen.')">+ Lüftungshinweis</button>
+  </div>
+  <textarea id="pSan" placeholder="Individueller Sanierungsvorschlag / Empfehlung..."></textarea>
+</div>
+
+<div class="c hide" id="secCost">
+  <h2>Kostenschätzung (Unverbindliche Richtpreise) <button class="btn b no-p" onclick="addCostRow()">+ Position</button></h2>
+  <table style="width:100%;border-collapse:collapse;font-size:13px" id="costTbl"><thead><tr style="background:#f1f5f9"><th align="left">Leistung / Position</th><th width="70">Menge</th><th width="70">Einh.</th><th width="90">EP Netto €</th><th width="90">Gesamt €</th><th class="no-p" width="35"></th></tr></thead><tbody></tbody></table>
+  <div style="text-align:right;margin-top:6px;font-weight:700" id="costSum">Netto: 0,00 € | Brutto (19%): 0,00 €</div>
+</div>
+
+<div class="c hide" id="secDry">
+  <h2>Bautrocknung – Geräteauswahl, Miete, Service & kWh-Verbrauch <button class="btn b no-p" onclick="addDryRow()">+ Gerät hinzufügen</button></h2>
+  <div class="g" style="margin-bottom:8px">
+    <div><label>Einsatzdauer (Tage)</label><input type="number" id="dryDays" value="14" onchange="calcDry()"></div>
+    <div><label>Laufzeit (Std./Tag)</label><input type="number" id="dryHrs" value="24" onchange="calcDry()"></div>
+    <div><label>Strompreis Kunde (€/kWh)</label><input type="number" step="0.01" id="dryKwhP" value="0.38" onchange="calcDry()"></div>
+    <div><label>Auf-/Abbau/Service (Std. geschätzt, auf Nachweis)</label><input type="number" step="0.5" id="drySrvH" value="3" onchange="calcDry()"></div>
+    <div><label>Service-Stundensatz (€/Std. netto)</label><input type="number" step="1" id="drySrvR" value="68" onchange="calcDry()"></div>
+  </div>
+  <div id="dryRows"></div>
+  <div style="background:#f8fafc;border:1px solid #cbd5e1;padding:8px;border-radius:5px;margin-top:6px;font-size:13px" id="drySum"></div>
+</div>
+
+<div class="c hide" id="secNorm">
+  <h2>Normen, Richtwerte & Bewertungslegende</h2>
+  <p style="font-size:12px;margin:0;line-height:1.5"><b>DIN 4108-2:</b> Kritische Oberflächenfeuchte ab 80 % r.F. (Schimmelpilzrisiko). <b>Taupunkt (100 % r.F.):</b> Tauwasserausfall.<br>
+  <b>Gann Digits (Orientierung):</b> &lt;40 trocken · 40–60 leicht erhöht · 61–80 erhöht/feucht · &gt;80 nass.<br>
+  <b>CM-Messung (Zementestrich):</b> ≤ 2,0 CM-% belegreif (unbeheizt) · ≤ 1,8 CM-% (beheizt). <b>Anhydritestrich:</b> ≤ 0,5 CM-% (unbeheizt) · ≤ 0,3 CM-% (beheizt).</p>
+</div>
+
+<div class="c">
+  <h2>4. Digitale Unterschriften</h2>
+  <div class="g">
+    <div><label>Techniker / Prüfer (Breucha Malerbetrieb e.K.)</label><canvas id="sig1" width="320" height="90" style="border:1px solid #94a3b8;background:#fff;touch-action:none;max-width:100%"></canvas><br><button class="btn no-p" onclick="clrSig('sig1')">Löschen</button></div>
+    <div><label>Auftraggeber / Kunde / Bauleitung</label><canvas id="sig2" width="320" height="90" style="border:1px solid #94a3b8;background:#fff;touch-action:none;max-width:100%"></canvas><br><button class="btn no-p" onclick="clrSig('sig2')">Löschen</button></div>
+  </div>
+</div>
+</div>
+
+<div id="projModal" class="lk hide no-p"><div class="lkb" style="max-width:520px;text-align:left">
+  <h3 style="margin-top:0">Gespeicherte Projekte & Datenimport</h3>
+  <button class="btn b" onclick="document.getElementById('jsonIn').click()">📂 Externe .json-Datei (Drive/Download) laden</button>
+  <input type="file" id="jsonIn" accept=".json" class="hide" onchange="importJson(this)">
+  <div id="projList" style="max-height:240px;overflow:auto;margin:10px 0;border:1px solid #cbd5e1;padding:6px"></div>
+  <button class="btn" onclick="document.getElementById('projModal').classList.add('hide')">Schließen</button>
+</div></div>
+
+<div id="lockScreen" class="lk hide no-p"><div class="lkb">
+  <h3>🔒 Breucha App gesperrt</h3>
+  <p style="font-size:13px">Bitte PIN eingeben zum Entsperren:</p>
+  <input type="password" id="pinIn" placeholder="PIN" style="text-align:center;font-size:18px;margin-bottom:8px">
+  <button class="btn b" style="width:100%;padding:9px" onclick="unlockApp()">Entsperren</button>
+  <button class="btn" style="width:100%;margin-top:6px" onclick="resetPin()">PIN zurücksetzen</button>
+</div></div>
+
+<script>
+let S={id:'',mps:[],plans:[],siteImgs:[],costs:[],dry:[],log:null};
+const DEVS=[
+  {n:'Kondenstrockner kompakt (350 W)',w:350,r:14},
+  {n:'Bautrockner mittel (650 W)',w:650,r:19},
+  {n:'Bautrockner stark (1100 W)',w:1100,r:26},
+  {n:'Infrarot-Heizplatte (450 W)',w:450,r:11},
+  {n:'Seitenkanalverdichter Dämmschicht (900 W)',w:900,r:29},
+  {n:'Axialventilator / Turbo-Lüfter (120 W)',w:120,r:8}
+];
+const EMIS=[
+  ['0.95','0,95 – Dispersionsfarbe / Tapete / Gips'],
+  ['0.94','0,94 – Putz / Mauerwerk / Beton'],
+  ['0.92','0,92 – Kunststoff / PVC'],
+  ['0.90','0,90 – Holz / Lack'],
+  ['0.85','0,85 – Fliesen / Glas'],
+  ['0.10','0,10 – Metall blank']
+];
+function tog(id,v){document.getElementById(id).classList.toggle('hide',!v);}
+function loadLogo(el){if(!el.files[0])return;let r=new FileReader();r.onload=e=>{localStorage.setItem('breucha_logo',e.target.result);showLogo();};r.readAsDataURL(el.files[0]);}
+function showLogo(){let d=localStorage.getItem('breucha_logo');if(d)document.getElementById('logoBox').innerHTML='<img src="'+d+'">';}
+function dew(t,rh){if(isNaN(t)||isNaN(rh)||rh<=0)return null;let a=17.27,b=237.7,al=((a*t)/(b+t))+Math.log(rh/100);let dp=(b*al)/(a-al);let al80=((a*t)/(b+t))+Math.log((rh/80));let t80=(b*al80)/(a-al80);return{dp:dp.toFixed(1),t80:t80.toFixed(1)};}
+function addMP(dup){
+  let n=S.mps.length+1,base=dup&&S.mps.length?JSON.parse(JSON.stringify(S.mps[S.mps.length-1])):{name:'MP '+n,room:'',bauteil:'',val:'',surfT:'',airT:'20',rh:'55',evalAuto:'',evalOwn:'',note:'',imgs:[],therms:[]};
+  if(dup){base.name='MP '+n;base.imgs=[];base.therms=[];}
+  S.mps.push(base);renderMPs();
+}
+function delMP(i){if(confirm('Messpunkt löschen?')){S.mps.splice(i,1);renderMPs();}}
+function movMP(i,d){let j=i+d;if(j<0||j>=S.mps.length)return;[S.mps[i],S.mps[j]]=[S.mps[j],S.mps[i]];renderMPs();}
+function calcEval(m){
+  let v=parseFloat(m.val),st=parseFloat(m.surfT),c=dew(parseFloat(m.airT),parseFloat(m.rh));
+  let res='Unauffällig / Trocken';
+  if((!isNaN(v)&&v>80)||(c&&!isNaN(st)&&st<=parseFloat(c.dp)))res='Kritisch / Nass – Sofortmaßnahme';
+  else if((!isNaN(v)&&v>60)||(c&&!isNaN(st)&&st<=parseFloat(c.t80)))res='Erhöht / Schimmelkritisch (80% r.F.)';
+  else if(!isNaN(v)&&v>40)res='Leicht erhöht / Beobachten';
+  m.evalAuto=res;return{res,c};
+}
+function renderMPs(){
+  let h='';S.mps.forEach((m,i)=>{
+    let ev=calcEval(m),klTxt=ev.c?`Taupunkt (100%): <b>${ev.c.dp} °C</b> · Schimmelgrenze (80% r.F.): <b>${ev.c.t80} °C</b>`:'Bitte Raumtemp. & r.F. eingeben';
+    let cam=document.getElementById('pCam').value.toUpperCase();
+    h+=`<div class="mp"><div class="mph"><b><input value="${m.name}" onchange="S.mps[${i}].name=this.value" style="width:120px;font-weight:700"></b>
+      <span>Auto-Bewertung: <b>${ev.res}</b></span>
+      <span class="no-p"><button class="btn" onclick="movMP(${i},-1)">↑</button> <button class="btn" onclick="movMP(${i},1)">↓</button> <button class="btn d" onclick="delMP(${i})">✕</button></span></div>
+      <div class="g">
+        <div><label>Raum / Geschoss</label><input value="${m.room}" onchange="S.mps[${i}].room=this.value"></div>
+        <div><label>Bauteil / Untergrund</label><input value="${m.bauteil}" onchange="S.mps[${i}].bauteil=this.value"></div>
+        <div><label>Feuchtemesswert</label><input value="${m.val}" onchange="S.mps[${i}].val=this.value;renderMPs()"></div>
+        <div><label>Oberflächentemp. (°C)</label><input type="number" step="0.1" value="${m.surfT}" onchange="S.mps[${i}].surfT=this.value;renderMPs()"></div>
+        <div><label>Raumlufttemp. (°C)</label><input type="number" step="0.1" value="${m.airT}" onchange="S.mps[${i}].airT=this.value;renderMPs()"></div>
+        <div><label>Rel. Luftfeuchte (%)</label><input type="number" step="1" value="${m.rh}" onchange="S.mps[${i}].rh=this.value;renderMPs()"></div>
+        <div><label>Eigene Bewertung (Überschreibung)</label><select onchange="S.mps[${i}].evalOwn=this.value">
+          <option value="" ${!m.evalOwn?'selected':''}>Automatisch übernehmen</option>
+          <option ${m.evalOwn=='Trocken / Unkritisch'?'selected':''}>Trocken / Unkritisch</option>
+          <option ${m.evalOwn=='Erhöhte Feuchte / Beobachten'?'selected':''}>Erhöhte Feuchte / Beobachten</option>
+          <option ${m.evalOwn=='Kritisch / Schimmelgefahr'?'selected':''}>Kritisch / Schimmelgefahr</option>
+          <option ${m.evalOwn=='Nass / Sofortmaßnahme'?'selected':''}>Nass / Sofortmaßnahme</option>
+        </select></div>
+        <div><label>Bemerkung / Befund</label><input value="${m.note}" onchange="S.mps[${i}].note=this.value"></div>
+      </div>
+      <div class="kl">${klTxt}</div>
+      <div class="no-p" style="margin-top:4px">
+        <button class="btn" onclick="document.getElementById('fi_${i}').click()">📷 Objekt-Fotos (Mehrfach)</button>
+        <input type="file" id="fi_${i}" accept="image/*" multiple class="hide" onchange="addMPImg(${i},this,false)">
+        <button class="btn" onclick="document.getElementById('ti_${i}').click()">🌡️ ${cam}-Wärmebilder (Mehrfach)</button>
+        <input type="file" id="ti_${i}" accept="image/*" multiple class="hide" onchange="addMPImg(${i},this,true)">
+        <button class="btn" onclick="openCamApp()">📱 Kamera-App</button>
+      </div>
+      <div class="im">${m.imgs.map((im,k)=>`<div class="ib"><img src="${im.d}"><input placeholder="Bildtext" value="${im.t}" onchange="S.mps[${i}].imgs[${k}].t=this.value"><button class="btn d no-p" onclick="S.mps[${i}].imgs.splice(${k},1);renderMPs()">✕</button></div>`).join('')}</div>
+      ${m.therms.length?`<div class="tg"><b style="font-size:12px">Thermografie (${cam}):</b><div class="im">${m.therms.map((tm,k)=>`<div class="ib" style="width:190px"><img src="${tm.d}">
+        <div style="display:flex;gap:3px;margin:3px 0"><input placeholder="Min °C" value="${tm.min}" onchange="S.mps[${i}].therms[${k}].min=this.value"><input placeholder="Max °C" value="${tm.max}" onchange="S.mps[${i}].therms[${k}].max=this.value"></div>
+        <select onchange="S.mps[${i}].therms[${k}].e=this.value">${EMIS.map(e=>`<option value="${e[0]}" ${tm.e==e[0]?'selected':''}>ε ${e[1]}</option>`).join('')}</select>
+        <input placeholder="Notiz" value="${tm.t}" onchange="S.mps[${i}].therms[${k}].t=this.value" style="margin-top:3px">
+        <button class="btn d no-p" onclick="S.mps[${i}].therms.splice(${k},1);renderMPs()">✕</button></div>`).join('')}</div></div>`:''}
+    </div>`;
+  });
+  document.getElementById('mpList').innerHTML=h;
+}
+function compImg(file,cb){
+  let r=new FileReader();r.onload=e=>{let img=new Image();img.onload=()=>{
+    let c=document.createElement('canvas'),m=850,w=img.width,h=img.height;
+    if(w>m){h=Math.round(h*m/w);w=m;}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
+    cb(c.toDataURL('image/jpeg',0.75));
+  };img.src=e.target.result;};r.readAsDataURL(file);
+}
+function addMPImg(i,el,isT){
+  Array.from(el.files).forEach(f=>compImg(f,d=>{
+    if(isT)S.mps[i].therms.push({d,min:'',max:'',e:'0.95',t:''});else S.mps[i].imgs.push({d,t:''});
+    renderMPs();
+  }));
+}
+function updCam(){renderMPs();}
+function openCamApp(){let c=document.getElementById('pCam').value;let u={hikmicro:'hikmicro://',flir:'flirone://',testo:'testo://',bosch:'boschthermal://',seek:'seekthermal://'}[c];if(u)window.location.href=u;}
+function addSiteTxt(t){let el=document.getElementById('siteText');el.value+=(el.value?'
+':'')+t;}
+function addSiteImgs(el){Array.from(el.files).forEach(f=>compImg(f,d=>{S.siteImgs.push({d,t:''});renderSiteImgs();}));}
+function renderSiteImgs(){document.getElementById('siteImgs').innerHTML=S.siteImgs.map((im,k)=>`<div class="ib"><img src="${im.d}"><input placeholder="Bildbeschreibung" value="${im.t}" onchange="S.siteImgs[${k}].t=this.value"><button class="btn d no-p" onclick="S.siteImgs.splice(${k},1);renderSiteImgs()">✕</button></div>`).join('');}
+function addPlans(el){Array.from(el.files).forEach(f=>compImg(f,d=>{S.plans.push({title:f.name.replace(/\.[^.]+$/,''),img:d,pins:[]});renderPlans();}));}
+function addBlankPlan(){let c=document.createElement('canvas');c.width=700;c.height=360;let x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,700,360);x.strokeStyle='#cbd5e1';for(let i=0;i<700;i+=25){x.beginPath();x.moveTo(i,0);x.lineTo(i,360);x.stroke();}for(let j=0;j<360;j+=25){x.beginPath();x.moveTo(0,j);x.lineTo(700,j);x.stroke();}S.plans.push({title:'Handskizze '+(S.plans.length+1),img:c.toDataURL(),pins:[]});renderPlans();}
+function renderPlans(){
+  let h=S.plans.map((p,pi)=>`<div style="border:1px solid #cbd5e1;padding:8px;border-radius:6px;margin-bottom:8px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:5px"><input value="${p.title}" onchange="S.plans[${pi}].title=this.value" style="font-weight:700;max-width:280px">
+    <span class="no-p"><button class="btn" onclick="S.plans[${pi}].pins.pop();renderPlans()">↩ Pin</button> <button class="btn d" onclick="S.plans.splice(${pi},1);renderPlans()">✕ Plan</button></span></div>
+    <canvas id="plc_${pi}" class="pl" width="700" height="360" onclick="hitPlan(event,${pi})"></canvas>
+    <div style="font-size:12px;margin-top:4px">${p.pins.map(pn=>`<b>[${pn.t}]</b> ${pn.l}`).join(' · ')}</div>
+  </div>`).join('');
+  document.getElementById('plansList').innerHTML=h;
+  S.plans.forEach((p,pi)=>{
+    let c=document.getElementById('plc_'+pi),x=c.getContext('2d'),im=new Image();
+    im.onload=()=>{c.height=Math.round(700*im.height/im.width);x.drawImage(im,0,0,700,c.height);
+      p.pins.forEach(pn=>{x.fillStyle=pn.t=='MP'?'#dc2626':'#ea580c';x.beginPath();x.arc(pn.x,pn.y,11,0,6.28);x.fill();x.fillStyle='#fff';x.font='bold 10px sans-serif';x.textAlign='center';x.fillText(pn.t,pn.x,pn.y+3);if(pn.l){x.fillStyle='#0f172a';x.fillText(pn.l,pn.x,pn.y-14);}});
+    };im.src=p.img;
+  });
+}
+function hitPlan(e,pi){
+  let c=e.target,r=c.getBoundingClientRect(),x=Math.round((e.clientX-r.left)*(c.width/r.width)),y=Math.round((e.clientY-r.top)*(c.height/r.height));
+  let t=document.getElementById('pinType').value,l=document.getElementById('pinLabel').value||(t+(S.plans[pi].pins.length+1));
+  S.plans[pi].pins.push({x,y,t,l});renderPlans();
+}
+function parseLogger(el){
+  if(!el.files[0])return;let r=new FileReader();r.onload=e=>{
+    let lines=e.target.result.split(/?
+/).filter(l=>l.trim()),ts=[],hs=[];
+    lines.forEach(l=>{let p=l.split(/[;,	]/).map(s=>parseFloat(s.replace(',','.'))).filter(n=>!isNaN(n));if(p.length>=2){ts.push(p[0]);hs.push(p[1]);}});
+    if(!ts.length){document.getElementById('logOut').innerText='Keine gültigen Zahlenreihen (Temp;Feuchte) erkannt.';return;}
+    let minT=Math.min(...ts).toFixed(1),maxT=Math.max(...ts).toFixed(1),avgT=(ts.reduce((a,b)=>a+b,0)/ts.length).toFixed(1);
+    let minH=Math.min(...hs).toFixed(1),maxH=Math.max(...hs).toFixed(1),avgH=(hs.reduce((a,b)=>a+b,0)/hs.length).toFixed(1);
+    let crit=Math.round(hs.filter(v=>v>=80).length*100/hs.length);
+    S.log={ts,hs,summary:`Messwerte: ${ts.length} · Temp: Min ${minT}°C / Ø ${avgT}°C / Max ${maxT}°C · Luftfeuchte: Min ${minH}% / Ø ${avgH}% / Max ${maxH}% · Schimmelkritisch (≥80% r.F.): ${crit}% der Zeit`};
+    drawLogger();
+  };r.readAsText(el.files[0]);
+}
+function drawLogger(){
+  if(!S.log)return;document.getElementById('logOut').innerHTML=S.log.summary;
+  let c=document.getElementById('logChart');c.classList.remove('hide');let x=c.getContext('2d');x.clearRect(0,0,760,190);
+  let n=S.log.ts.length;
+  x.strokeStyle='#dc2626';x.beginPath();S.log.ts.forEach((v,i)=>{let px=i*760/Math.max(1,n-1),py=180-(v+10)*3;i?x.lineTo(px,py):x.moveTo(px,py);});x.stroke();
+  x.strokeStyle='#2563eb';x.beginPath();S.log.hs.forEach((v,i)=>{let px=i*760/Math.max(1,n-1),py=180-v*1.7;i?x.lineTo(px,py):x.moveTo(px,py);});x.stroke();
+}
+function addCostRow(){S.costs.push({pos:'',qty:1,unit:'psch',ep:0});renderCost();}
+function renderCost(){
+  let tb=document.querySelector('#costTbl tbody'),sum=0;
+  tb.innerHTML=S.costs.map((c,i)=>{let g=c.qty*c.ep;sum+=g;return`<tr><td><input value="${c.pos}" onchange="S.costs[${i}].pos=this.value"></td><td><input type="number" value="${c.qty}" onchange="S.costs[${i}].qty=+this.value;renderCost()"></td><td><input value="${c.unit}" onchange="S.costs[${i}].unit=this.value"></td><td><input type="number" step="0.01" value="${c.ep}" onchange="S.costs[${i}].ep=+this.value;renderCost()"></td><td align="right">${g.toFixed(2)} €</td><td class="no-p"><button class="btn d" onclick="S.costs.splice(${i},1);renderCost()">✕</button></td></tr>`;}).join('');
+  document.getElementById('costSum').innerText=`Netto: ${sum.toFixed(2)} € | Brutto (19% MwSt.): ${(sum*1.19).toFixed(2)} €`;
+}
+function addDryRow(){S.dry.push({idx:0,cnt:1,w:350,r:14});renderDry();}
+function renderDry(){
+  document.getElementById('dryRows').innerHTML=S.dry.map((d,i)=>`<div class="g" style="margin-bottom:6px;background:#f8fafc;padding:6px;border-radius:5px;border:1px solid #cbd5e1">
+    <div><label>Gerät</label><select onchange="let o=DEVS[this.value];S.dry[${i}]={idx:+this.value,cnt:S.dry[${i}].cnt,w:o.w,r:o.r};renderDry()">${DEVS.map((dv,di)=>`<option value="${di}" ${d.idx==di?'selected':''}>${dv.n}</option>`).join('')}</select></div>
+    <div><label>Anzahl</label><input type="number" value="${d.cnt}" onchange="S.dry[${i}].cnt=+this.value;calcDry()"></div>
+    <div><label>Leistung (W)</label><input type="number" value="${d.w}" onchange="S.dry[${i}].w=+this.value;calcDry()"></div>
+    <div><label>Miete / Tag (€ netto)</label><input type="number" step="0.5" value="${d.r}" onchange="S.dry[${i}].r=+this.value;calcDry()"></div>
+    <div class="no-p" style="display:flex;align-items:end"><button class="btn d" onclick="S.dry.splice(${i},1);renderDry()">Entfernen</button></div>
+  </div>`).join('');calcDry();
+}
+function calcDry(){
+  let days=+document.getElementById('dryDays').value||0,hrs=+document.getElementById('dryHrs').value||0,kp=+document.getElementById('dryKwhP').value||0;
+  let sh=+document.getElementById('drySrvH').value||0,sr=+document.getElementById('drySrvR').value||0;
+  let kwh=0,rent=0;S.dry.forEach(d=>{kwh+=(d.cnt*d.w/1000)*hrs*days;rent+=d.cnt*d.r*days;});
+  let srv=sh*sr,net=rent+srv,brut=net*1.19,elCost=kwh*kp;
+  document.getElementById('drySum').innerHTML=`<b>Gerätemiete (${days} Tage):</b> ${rent.toFixed(2)} € netto · <b>Auf-/Abbau/Service (${sh} Std. à ${sr} €, auf Nachweis):</b> ${srv.toFixed(2)} € netto<br>
+  <b>Voraussichtliche Gesamtkosten: ${net.toFixed(2)} € netto | ${brut.toFixed(2)} € brutto (inkl. 19% MwSt.)</b><br>
+  <b>Geschätzter Stromverbrauch:</b> ${kwh.toFixed(1)} kWh (${(kwh/Math.max(1,days)).toFixed(1)} kWh/Tag) · <b>Stromkosten Kunde (ca.):</b> ${elCost.toFixed(2)} €`;
+}
+async function connUSB(){try{let p=await navigator.serial.requestPort();await p.open({baudRate:9600});document.getElementById('hwStat').innerText='🔌 USB verbunden';let r=p.readable.getReader();while(true){let{value,done}=await r.read();if(done)break;let txt=new TextDecoder().decode(value).match(/[-+]?\d*[.,]?\d+/);if(txt&&S.mps.length){S.mps[S.mps.length-1].val=txt[0];renderMPs();}}}catch(e){alert('USB-Gerät nicht verbunden oder Browser unterstützt Web Serial nicht (Chrome/Edge nutzen).');}}
+async function connBLE(){try{let d=await navigator.bluetooth.requestDevice({acceptAllDevices:true});document.getElementById('hwStat').innerText='📶 BT: '+(d.name||'Gerät');}catch(e){alert('Bluetooth-Scan abgebrochen oder nicht unterstützt.');}}
+function getState(){return{S,f:{pNr:pNr.value,pDate:pDate.value,pTech:pTech.value,pCust:pCust.value,pObj:pObj.value,pDev:pDev.value,pCam:pCam.value,pOut:pOut.value,siteTitle:siteTitle.value,siteText:siteText.value,pSan:pSan.value,dryDays:dryDays.value,dryHrs:dryHrs.value,dryKwhP:dryKwhP.value,drySrvH:drySrvH.value,drySrvR:drySrvR.value}};}
+function setState(d){S=d.S||S;if(d.f)Object.keys(d.f).forEach(k=>{if(document.getElementById(k))document.getElementById(k).value=d.f[k];});renderMPs();renderSiteImgs();renderPlans();renderCost();renderDry();if(S.log)drawLogger();}
+function saveLocal(msg){let all=JSON.parse(localStorage.getItem('breucha_projs')||'{}');let k=pNr.value||('MP-'+Date.now());all[k]=getState();localStorage.setItem('breucha_projs',JSON.stringify(all));if(msg)alert('Projekt '+k+' auf Tablet gespeichert.');}
+function openProjModal(){let all=JSON.parse(localStorage.getItem('breucha_projs')||'{}');document.getElementById('projList').innerHTML=Object.keys(all).map(k=>`<div style="display:flex;justify-content:space-between;padding:4px;border-bottom:1px solid #eee"><span><b>${k}</b> – ${all[k].f?.pObj||''}</span><span><button class="btn b" onclick="loadProj('${k}')">Öffnen</button> <button class="btn d" onclick="delProj('${k}')">✕</button></span></div>`).join('')||'Keine gespeicherten Projekte.';document.getElementById('projModal').classList.remove('hide');}
+function loadProj(k){let all=JSON.parse(localStorage.getItem('breucha_projs')||'{}');if(all[k]){setState(all[k]);document.getElementById('projModal').classList.add('hide');}}
+function delProj(k){let all=JSON.parse(localStorage.getItem('breucha_projs')||'{}');delete all[k];localStorage.setItem('breucha_projs',JSON.stringify(all));openProjModal();}
+function exportJson(){let blob=new Blob([JSON.stringify(getState())],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(pNr.value||'Breucha_Projekt')+'.json';a.click();}
+function importJson(el){if(!el.files[0])return;let r=new FileReader();r.onload=e=>{setState(JSON.parse(e.target.result));document.getElementById('projModal').classList.add('hide');};r.readAsText(el.files[0]);}
+async function shareProj(){let f=new File([JSON.stringify(getState())],(pNr.value||'Breucha_Projekt')+'.json',{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],title:'Breucha Messprotokoll'});else exportJson();}
+function sendGmail(){let sub=encodeURIComponent('Messprotokoll '+(pNr.value||'')+' – '+(pObj.value||''));let body=encodeURIComponent('Guten Tag,
+
+anbei das Messprotokoll '+(pNr.value||'')+' für Objekt '+(pObj.value||'')+'.
+
+Mit freundlichen Grüßen
+Breucha Malerbetrieb e.K.');window.open('https://mail.google.com/mail/?view=cm&to=k3.projektdienstleistung@gmail.com,arno.seemann@breucha.de&su='+sub+'&body='+body,'_blank');}
+function newProj(){if(confirm('Neues leeres Projekt starten?')){S={id:'',mps:[],plans:[],siteImgs:[],costs:[],dry:[],log:null};pNr.value='MP-'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'-'+Math.floor(100+Math.random()*900);pDate.value=new Date().toISOString().slice(0,10);pCust.value='';pObj.value='';pSan.value='';siteText.value='';addMP(false);renderSiteImgs();renderPlans();renderCost();renderDry();}}
+function discardProj(){if(confirm('Aktuelle Eingaben verwerfen?'))newProj();}
+function lockApp(){saveLocal(0);let p=localStorage.getItem('breucha_pin');if(!p){p=prompt('Bitte neuen PIN-Code zum Sperren festlegen:','1234');if(!p)return;localStorage.setItem('breucha_pin',p);}document.getElementById('lockScreen').classList.remove('hide');}
+function unlockApp(){let p=localStorage.getItem('breucha_pin')||'1234';if(document.getElementById('pinIn').value===p){document.getElementById('lockScreen').classList.add('hide');document.getElementById('pinIn').value='';}else alert('Falscher PIN');}
+function resetPin(){if(confirm('PIN wirklich zurücksetzen?')){localStorage.removeItem('breucha_pin');document.getElementById('lockScreen').classList.add('hide');}}
+function initSig(id){let c=document.getElementById(id),x=c.getContext('2d'),d=false;let pos=e=>{let r=c.getBoundingClientRect(),t=e.touches?e.touches[0]:e;return[(t.clientX-r.left)*(c.width/r.width),(t.clientY-r.top)*(c.height/r.height)];};c.onpointerdown=e=>{d=true;x.beginPath();x.moveTo(...pos(e));};c.onpointermove=e=>{if(!d)return;x.lineTo(...pos(e));x.stroke();};c.onpointerup=()=>d=false;}
+function clrSig(id){let c=document.getElementById(id);c.getContext('2d').clearRect(0,0,c.width,c.height);}
+localStorage.removeItem('breucha_locked');showLogo();initSig('sig1');initSig('sig2');
+pNr.value='MP-'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'-'+Math.floor(100+Math.random()*900);
+pDate.value=new Date().toISOString().slice(0,10);addMP(false);
+</script></body></html>
